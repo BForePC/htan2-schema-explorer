@@ -1,12 +1,12 @@
 name: Upstream schema check
 
-# hourly: compare ncihtan/htan2-data-model main with data/upstream.json.
+# daily: compare ncihtan/htan2-data-model main with data/upstream.json.
 # commits the new state when any JSON_Schemas/<version>/ folder is added, changed or removed,
 # and opens an issue for each new version folder. the site itself reads main live and needs no rebuild.
 
 on:
   schedule:
-    - cron: '23 * * * *'
+    - cron: '23 6 * * *'
   workflow_dispatch:
 
 permissions:

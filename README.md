@@ -105,7 +105,7 @@ V=$(date +%Y%m%d%H%M); sed -i '' -E "s#\?v=[0-9]+#?v=$V#g" index.html js/app.js 
 
 ## Upstream check (GitHub Action)
 
-The site reads `ncihtan/htan2-data-model` `main` live, so new commits and new `JSON_Schemas/<version>/` folders appear without a rebuild. `.github/workflows/upstream-check.yml` runs hourly (and on demand from the Actions tab) to record what changed:
+The site reads `ncihtan/htan2-data-model` `main` live, so new commits and new `JSON_Schemas/<version>/` folders appear without a rebuild. `.github/workflows/upstream-check.yml` runs daily at 06:23 UTC (and on demand from the Actions tab) to record what changed:
 
 - compares the main commit and the git tree sha of each `JSON_Schemas/<version>/` folder with `data/upstream.json` (commits that do not touch compiled schemas are ignored)
 - on a change, commits the new `data/upstream.json` (this also keeps the scheduled workflow from being disabled after 60 days without commits)
