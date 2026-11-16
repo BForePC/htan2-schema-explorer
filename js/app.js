@@ -1,11 +1,12 @@
 import { listRefs, resolve, schemaVersions, schemaFiles, fetchFile, githubUrl } from './github.js';
 import { buildModel, moduleLabel, MODULE_DIRS, METADATA_MODULES } from './model.js';
+import { KIT_URL, MODALITIES, TIERS, MODULE_EXAMPLES, buildId, exampleId } from './fileid.js';
 
 const DEFAULT_REPO = 'ncihtan/htan2-data-model';
 const $ = id => document.getElementById(id);
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const COL = { required: css('--req'), optional: css('--opt'), conditional: css('--cond'), varies: css('--var') };
-const ST = { required: 'Always required', optional: 'Always optional', conditional: 'Conditionally required', varies: 'Differs by schema' };
+const ST = { required: 'Always required', optional: 'Always optional', conditional: 'Conditionally required', varies: 'Differs by module' };
 const SCOL = { R: COL.required, C: COL.conditional, O: COL.optional };
 const SNAME = { R: 'required', C: 'conditionally required', O: 'optional' };
 const COND_TEXT = '#8f6312';
@@ -63,7 +64,7 @@ async function load(repo, ref, version, commit) {
   try {
     commit = commit || commitCache || await resolve(repo, ref);
     const paths = schemaFiles(commit.paths, version);
-    status(`Loading ${paths.length} schemas from ${ref} / ${version}...`);
+    status(`Loading ${paths.length} modules from ${ref} / ${version}...`);
     const files = await Promise.all(paths.map(async p => ({ path: p, json: await fetchFile(repo, commit, p) })));
     M = buildModel(files);
     CTX = { repo, ref, sha: commit.sha, date: commit.date, version, source: commit.source };
@@ -72,7 +73,7 @@ async function load(repo, ref, version, commit) {
     writeQuery(repo, ref, version);
     renderAll();
     const short = commit.sha.length > 12 ? commit.sha.slice(0, 7) : commit.sha;
-    status(`${M.schemas.length} schemas · ${M.attributes.length} attributes · ${repo}@${ref} (${short}${commit.date ? ', ' + commit.date : ''}) · ${version}`
+    status(`${M.schemas.length} modules · ${M.attributes.length} attributes · ${repo}@${ref} (${short}${commit.date ? ', ' + commit.date : ''}) · ${version}`
       + (commit.source === 'jsdelivr' ? ' · via jsDelivr' : ''));
   } catch (e) {
     console.error(e);
@@ -141,10 +142,10 @@ dbody.addEventListener('click', e => {
 function openSchema(id) {
   const s = schemaById.get(id); if (!s) return;
   const by = st => s.attrs.filter(x => x[1] === st);
-  const li = (a, st) => `<li data-a="${esc(a.id)}"><span class="dot" style="background:${SCOL[st]}"></span><code>${esc(a.id)}</code>${a.in.length > 1 ? `<span class="s">in ${a.in.length} schemas</span>` : ''}</li>`;
+  const li = (a, st) => `<li data-a="${esc(a.id)}"><span class="dot" style="background:${SCOL[st]}"></span><code>${esc(a.id)}</code>${a.in.length > 1 ? `<span class="s">in ${a.in.length} modules</span>` : ''}</li>`;
   const cli = a => `<li data-a="${esc(a.id)}" style="flex-wrap:wrap"><span class="dot" style="background:${COL.conditional}"></span><code>${esc(a.id)}</code><span class="whenline">when ${rulesFor(s.id, a.id).map(r => esc(r.when)).join('; or when ')}</span></li>`;
   dbody.innerHTML = `<h2>${s.id}</h2><span class="badge">${moduleLabel(s.module)}${s.levels.length ? ' · Level ' + s.levels.join(' & ') : ''}</span>
-    <a class="badge lnk" href="${jsonUrl(s)}" target="_blank" rel="noopener">JSON schema ↗</a> <a class="badge lnk" href="${modUrl(s.module)}" target="_blank" rel="noopener">module source ↗</a>
+    <a class="badge lnk" href="${jsonUrl(s)}" target="_blank" rel="noopener">JSON schema ↗</a> <a class="badge lnk" href="${modUrl(s.module)}" target="_blank" rel="noopener">category source ↗</a>
     <div class="kv">${esc(s.description)}</div>
     <div class="kv"><b>Required (${by('R').length})</b><ul class="lst">${by('R').map(x => li(x[0], 'R')).join('')}</ul></div>
     ${by('C').length ? `<div class="kv"><b>Conditionally required (${by('C').length})</b><ul class="lst">${by('C').map(x => cli(x[0])).join('')}</ul></div>` : ''}
@@ -158,7 +159,7 @@ function openAttr(id) {
   dbody.innerHTML = `<h2>${esc(a.id)}</h2><span class="badge"><span class="dot" style="background:${COL[a.status]}"></span>${ST[a.status]}</span>
     <div class="kv"><b>Used in ${a.in.length} schema${a.in.length > 1 ? 's' : ''}</b><ul class="lst">${a.in.map(([s, r]) => `<li data-s="${s}" style="flex-wrap:wrap"><span class="dot" style="background:${SCOL[r]}"></span>${s}<span class="s">${SNAME[r]}</span>${r === 'C' ? `<span class="whenline">when ${rulesFor(s, a.id).map(x => esc(x.when)).join('; or when ')}</span>` : ''}</li>`).join('')}</ul></div>
     ${triggers.length ? `<div class="kv"><b>Triggers rules</b>${triggers.map(([sid, r]) => `<div style="margin-top:3px">${sid}: when ${esc(r.when)} → ${r.requires.length ? 'requires ' + r.requires.map(esc).join(', ') : 'must leave empty ' + r.forbids.map(esc).join(', ')}</div>`).join('')}</div>` : ''}
-    ${a.variants.length > 1 ? `<div class="kv" style="color:var(--text-primary)">Definition differs across schemas (${a.variants.length} variants)</div>` : ''}
+    ${a.variants.length > 1 ? `<div class="kv" style="color:var(--text-primary)">Definition differs across modules (${a.variants.length} variants)</div>` : ''}
     ${a.variants.map(v => `${a.variants.length > 1 ? `<div class="kv" style="border-top:1px solid var(--border);padding-top:8px"><b>In</b>${v.schemas.join(', ')}</div>` : ''}
       <div class="kv"><b>Description</b>${esc(v.description) || '-'}</div>
       <div class="kv"><b>Type</b><code>${esc(v.type) || '-'}</code></div>
@@ -170,10 +171,11 @@ function openAttr(id) {
 // ---------------------------------------------------------------- header links + level grid
 function renderHeader() {
   const short = CTX.sha.length > 12 ? CTX.sha.slice(0, 7) : CTX.sha;
-  $('sub').innerHTML = `HTAN Phase 2 data model ${esc(CTX.version)} (${esc(CTX.ref)} @ <code>${esc(short)}</code>${CTX.date ? ', ' + CTX.date : ''}). What each schema asks a submitter to fill in, by data level.`;
+  $('sub').innerHTML = `HTAN Phase 2 data model ${esc(CTX.version)} (${esc(CTX.ref)} @ <code>${esc(short)}</code>${CTX.date ? ', ' + CTX.date : ''}). What each module asks a submitter to fill in, by data level.`;
   $('links').innerHTML = `
-    <a href="${githubUrl(CTX.repo, CTX.sha, 'JSON_Schemas/' + CTX.version)}" target="_blank" rel="noopener">HTAN Phase 2 ${esc(CTX.version)} JSON schemas (pinned)</a>
-    <a href="${githubUrl(CTX.repo, CTX.sha, 'modules')}" target="_blank" rel="noopener">HTAN Phase 2 modules (pinned source)</a>
+    <a href="${githubUrl(CTX.repo, CTX.sha, 'modules')}" target="_blank" rel="noopener">HTAN Phase 2 modules (${esc(CTX.ref)} source)</a>
+    <a href="https://htan2-data-model.readthedocs.io/en/main/" target="_blank" rel="noopener">Data model documentation (main)</a>
+    <a href="${KIT_URL}" target="_blank" rel="noopener">fileid-kit</a>
     <a href="https://docs.humantumoratlas.org/data_submission/checklist/" target="_blank" rel="noopener">HTAN acceptance checklist</a>
     <a href="https://docs.humantumoratlas.org/addtnl_info/rfc/" target="_blank" rel="noopener">HTAN RFC process</a>`;
 }
@@ -190,7 +192,7 @@ function renderLevels() {
   const maxL = Math.max(4, ...M.schemas.flatMap(s => s.levels));
   const assay = M.modules.filter(m => !METADATA_MODULES.has(m) && M.schemas.some(s => s.module === m && s.levels.length));
   const meta = M.modules.filter(m => !assay.includes(m));
-  let h = `<thead><tr><th>Module</th>${Array.from({ length: maxL }, (_, i) => `<th>Level ${i + 1}</th>`).join('')}<th>Companion record</th></tr></thead><tbody>`;
+  let h = `<thead><tr><th>Category</th>${Array.from({ length: maxL }, (_, i) => `<th>Level ${i + 1}</th>`).join('')}<th>Companion record</th></tr></thead><tbody>`;
   if (meta.length) {
     const ms = M.schemas.filter(s => meta.includes(s.module));
     h += `<tr><td class="m">${meta.map(m => `<a href="${modUrl(m)}" target="_blank" rel="noopener">${moduleLabel(m)}</a>`).join(' &amp; ')}</td>
@@ -224,9 +226,9 @@ function renderBars() {
   const RH = 24, MH = 30, H = d3.sum(rows, r => (r.mod ? MH : RH)) + 30;
   const x = d3.scaleLinear().domain([0, d3.max(M.schemas, s => s.n)]).nice().range([labelW, W - countW]);
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('role', 'img')
-    .attr('aria-label', 'Required, conditional and optional attribute counts per schema');
+    .attr('aria-label', 'Required, conditional and optional attribute counts per module');
   svg.append('g').attr('class', 'axis').attr('transform', 'translate(0,20)').call(d3.axisTop(x).ticks(6).tickSize(-(H - 28)))
-    .call(g => g.select('.domain').remove()).call(g => g.selectAll('line').attr('stroke', 'var(--grid)'));
+    .call(g => g.select('.domain').remove()).call(g => g.selectAll('text').attr('font-size', 13)).call(g => g.selectAll('line').attr('stroke', 'var(--grid)'));
   svg.append('text').attr('x', W - countW + 8).attr('y', 14).attr('class', 'modlbl').text('req + cond / total');
   let y = 26;
   for (const r of rows) {
@@ -240,7 +242,7 @@ function renderBars() {
       const gap = a0 > x(0) ? 1 : 0;
       g.append('rect').attr('x', a0 + gap).attr('y', by).attr('height', bh).attr('width', Math.max(1, a1 - a0 - gap - 1)).attr('fill', c).attr('rx', 2);
     });
-    g.append('text').attr('x', W - countW + 8).attr('y', RH / 2).attr('dy', '.35em').attr('font-size', 12)
+    g.append('text').attr('x', W - countW + 8).attr('y', RH / 2).attr('dy', '.35em').attr('font-size', 13)
       .html(`<tspan font-weight="600">${s.nreq}</tspan>${s.ncond ? `<tspan fill="var(--text-muted)"> + </tspan><tspan font-weight="600" fill="${COND_TEXT}">${s.ncond}</tspan>` : ''}<tspan fill="var(--text-muted)"> / ${s.n}</tspan>`);
     g.on('mousemove', e => showTip(`<b>${s.id}</b><div class="m">${s.nreq} required · ${s.ncond} conditional · ${s.n - s.nreq - s.ncond} optional</div><div class="m">${esc(s.description)}</div>`, e))
       .on('mouseleave', hideTip).on('click', () => { hideTip(); openSchema(s.id); });
@@ -251,7 +253,7 @@ function renderBars() {
 // ---------------------------------------------------------------- conditional rules table
 function renderRules() {
   const msel = $('rmod'), keep = msel.value;
-  msel.innerHTML = '<option value="">All modules</option>' + M.modules.filter(m => M.schemas.some(s => s.module === m && s.rules.length))
+  msel.innerHTML = '<option value="">All categories</option>' + M.modules.filter(m => M.schemas.some(s => s.module === m && s.rules.length))
     .map(m => `<option value="${m}">${moduleLabel(m)}</option>`).join('');
   msel.value = [...msel.options].some(o => o.value === keep) ? keep : '';
   drawRules();
@@ -282,7 +284,7 @@ function drawMatrix() {
   if (q) rows = rows.filter(a => a.id.toLowerCase().includes(q));
   rows.sort((a, b) => d3.descending(a.in.length, b.in.length) || d3.descending(a.nreq, b.nreq) || d3.ascending(a.id, b.id));
   $('mcount').textContent = `${rows.length} attributes`;
-  const C = 15, labelW = 300, headH = 210, W = labelW + cols.length * C + 60, H = headH + rows.length * C + 10;
+  const C = 18, labelW = 340, headH = 230, W = labelW + cols.length * C + 60, H = headH + rows.length * C + 10;
   const el = $('matrix'); el.innerHTML = '';
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
   let col = 0;
@@ -292,7 +294,7 @@ function drawMatrix() {
     col += n;
   });
   cols.forEach((s, i) => {
-    svg.append('text').attr('transform', `translate(${labelW + i * C + C / 2 + 4},${headH - 8}) rotate(-60)`).attr('font-size', 11)
+    svg.append('text').attr('transform', `translate(${labelW + i * C + C / 2 + 4},${headH - 8}) rotate(-60)`).attr('font-size', 13)
       .attr('fill', 'var(--text-secondary)').style('cursor', 'pointer').text(s.id).on('click', () => openSchema(s.id))
       .on('mousemove', e => showTip(`<b>${s.id}</b><div class="m">${moduleLabel(s.module)}</div>`, e)).on('mouseleave', hideTip);
   });
@@ -300,8 +302,8 @@ function drawMatrix() {
     const y = headH + r * C, g = svg.append('g').style('cursor', 'pointer');
     g.append('rect').attr('y', y).attr('width', W).attr('height', C).attr('fill', 'transparent').attr('class', 'rowbg');
     if (a.status === 'varies') g.append('circle').attr('cx', 6).attr('cy', y + C / 2).attr('r', 4).attr('fill', COL.varies);
-    g.append('text').attr('x', 16).attr('y', y + C / 2).attr('dy', '.35em').attr('font-size', 11).attr('font-family', 'ui-monospace,Menlo,monospace').text(a.id);
-    g.append('text').attr('x', labelW - 8).attr('y', y + C / 2).attr('dy', '.35em').attr('font-size', 11).attr('text-anchor', 'end').attr('fill', 'var(--text-muted)').text(a.in.length);
+    g.append('text').attr('x', 16).attr('y', y + C / 2).attr('dy', '.35em').attr('font-size', 13).attr('font-family', 'ui-monospace,Menlo,monospace').text(a.id);
+    g.append('text').attr('x', labelW - 8).attr('y', y + C / 2).attr('dy', '.35em').attr('font-size', 13).attr('text-anchor', 'end').attr('fill', 'var(--text-muted)').text(a.in.length);
     const used = new Map(a.in);
     cols.forEach((s, i) => {
       const u = used.get(s.id);
@@ -314,7 +316,7 @@ function drawMatrix() {
       .on('mouseenter', function () { d3.select(this).select('.rowbg').attr('fill', 'var(--surface-2)'); })
       .on('mouseleave', function () { d3.select(this).select('.rowbg').attr('fill', 'transparent'); });
   });
-  svg.append('text').attr('x', labelW - 8).attr('y', headH - 8).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--text-muted)').text('# schemas');
+  svg.append('text').attr('x', labelW - 8).attr('y', headH - 8).attr('text-anchor', 'end').attr('font-size', 13).attr('fill', 'var(--text-muted)').text('# modules');
 }
 $('mfilter').onchange = drawMatrix;
 $('mq').oninput = drawMatrix;
@@ -404,10 +406,58 @@ function showTab(v) {
   if (v === 'matrix') drawMatrix();
   if (v === 'rules') renderRules();
   if (v === 'three') render3D();
+  if (v === 'fileid') renderFileIdModules();
 }
 document.querySelectorAll('.tab').forEach(t => (t.onclick = () => showTab(t.dataset.v)));
 let resizeT;
 addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => M && renderBars(), 150); });
+
+// ---------------------------------------------------------------- file identifiers
+const SEG = {
+  participant: ['participant', '#6b4f8a'], pool: ['pool', '#8a7a4f'], marker: ['file marker', '#a69a8e'],
+  specimen: ['specimen index', '#2e7d6e'], modality: ['assay', '#a0446b'], tier: ['data type', '#3f6fa6'], seq: ['file number', '#b0782a'],
+};
+const modName = c => (MODALITIES.find(m => m[0] === c) || [, c])[1];
+const tierName = c => (TIERS.find(t => t[0] === c) || [, c])[1];
+function segHtml(segs, copy) {
+  const sub = { modality: v => modName(v), tier: v => tierName(v) };
+  return segs.map(([k, v]) => `<span class="seg" style="--sc:${SEG[k][1]}">${esc(v)}<small>${SEG[k][0]}${sub[k] ? ': ' + esc(sub[k](v)) : ''}</small></span>`).join('')
+    + (copy ? `<button class="copy" data-copy="${esc(copy)}">copy</button>` : '');
+}
+function drawBuilder() {
+  const r = buildId({ participant: $('fParticipant').value, pool: $('fPool').value, specimen: $('fSpecimen').value,
+    modality: $('fModality').value, tier: $('fTier').value, seq: $('fSeq').value });
+  $('idout').innerHTML = segHtml(r.segs, r.errors.length ? '' : r.id);
+  $('iderr').textContent = r.errors.join(' · ');
+}
+function initFileId() {
+  $('idex').innerHTML = segHtml(buildId({ participant: 'HTA201_4', specimen: 3, modality: '19', tier: '07', seq: 1 }).segs);
+  $('fModality').innerHTML = MODALITIES.map(([c, n]) => `<option value="${c}">${c} ${esc(n)}</option>`).join('');
+  $('fTier').innerHTML = TIERS.map(([c, n]) => `<option value="${c}">${c} ${esc(n)}</option>`).join('');
+  $('fModality').value = '19';
+  ['fParticipant', 'fPool', 'fSpecimen', 'fModality', 'fTier', 'fSeq'].forEach(id => $(id).addEventListener('input', drawBuilder));
+  $('idtiers').innerHTML = `<table class="rt"><thead><tr><th>Code</th><th>Data type</th><th>Typical files</th></tr></thead><tbody>${
+    TIERS.map(([c, n, f]) => `<tr><td><code>${c}</code></td><td>${esc(n)}</td><td class="w">${esc(f)}</td></tr>`).join('')}</tbody></table>`;
+  document.getElementById('v-fileid').addEventListener('click', e => {
+    const b = e.target.closest('[data-copy]'); if (!b) return;
+    navigator.clipboard.writeText(b.dataset.copy).then(() => { b.textContent = 'copied'; setTimeout(() => (b.textContent = 'copy'), 1200); }, () => {});
+  });
+  drawBuilder();
+}
+function renderFileIdModules() {
+  const mods = M.modules.filter(m => MODULE_EXAMPLES[m]);
+  let h = '<table class="rt"><thead><tr><th>Level</th><th>File</th><th>Identifier</th><th>Format</th></tr></thead><tbody>';
+  for (const m of mods) {
+    const ex = MODULE_EXAMPLES[m];
+    h += `<tr class="grp"><td colspan="4">${moduleLabel(m)} <span style="font-weight:400;color:var(--text-muted)">· ${
+      ex.code ? `assay code ${ex.code} (${esc(modName(ex.code))})` : ''}${ex.note ? (ex.code ? ' · ' : '') + esc(ex.note) : ''}</span></td></tr>`;
+    for (const [lv, file, tier, seq, fmt] of ex.rows || []) {
+      h += `<tr><td>${lv}</td><td>${esc(file)}</td><td class="id"><code>${exampleId('HTA201_4', 3, ex.code, tier, seq)}</code></td><td class="w">${esc(fmt)}</td></tr>`;
+    }
+  }
+  $('idmods').innerHTML = h + '</tbody></table>';
+}
+initFileId();
 
 function renderAll() {
   drawer.classList.remove('open');

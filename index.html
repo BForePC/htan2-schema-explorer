@@ -3,10 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HTAN2 Schema Explorer - required, conditional and optional attributes</title>
-<meta name="description" content="Explore which HTAN Phase 2 data model attributes are required, conditionally required or optional, by module and data level, for any branch, tag or commit.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<title>HTAN2 Data Model Explorer</title>
+<meta name="description" content="Explore which HTAN Phase 2 data model attributes are required, conditionally required or optional, by category, module and data level, for any branch, tag or commit.">
 <link rel="stylesheet" href="css/style.css">
 <script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head>
@@ -15,12 +13,14 @@
   <h1>HTAN2 data model levels: what is required, conditional and optional</h1>
   <div class="sub" id="sub">Loading...</div>
   <div class="links" id="links"></div>
+  <p class="intro">HTAN files are organized by <b>data level</b>. <b>Level 1</b> is raw instrument output (sequencing reads, raw images). <b>Level 2</b> is aligned or compiled data (aligned reads, stitched images). <b>Level 3</b> is derived data (variant calls, expression matrices, segmentation masks). <b>Level 4</b> is summarized or integrated data (cell annotations, cell-by-feature tables). <b>Clinical</b> and <b>biospecimen</b> records describe participants and samples and have no level.
+  Each box in the table below is one module: the metadata fields a submitter fills in for that kind of file or record, and how many are required, conditionally required or optional. Click a box for its fields. The tabs below cover if/then rules, fields shared across modules and how to name files. Use the version picker to load any released version.</p>
 
   <div class="picker">
     <label>Repository<input id="repo" spellcheck="false" aria-label="GitHub repository owner/name"></label>
     <label>Branch or release tag<select id="ref" aria-label="Branch or tag"></select></label>
     <label>or commit SHA<input id="sha" placeholder="paste SHA + Enter" spellcheck="false" aria-label="Commit SHA"></label>
-    <label>Schema version<select id="ver" aria-label="JSON schema version folder"></select></label>
+    <label>Data model version<select id="ver" aria-label="Data model version"></select></label>
   </div>
   <div id="status" role="status"></div>
 
@@ -36,12 +36,13 @@
       <span><span class="sq" style="background:var(--opt)"></span><b>optional</b></span>
     </div>
     <table class="lv" id="levels"></table>
-    <div class="note" style="margin-top:6px">Module and level come from each schema's <code>$id</code>; level text is condensed from its description. Module names link to the module source, schema names to the JSON schema file. Counts: required · conditional · optional.</div>
+    <div class="note" style="margin-top:6px">Category and level come from each module's <code>$id</code>; level text is condensed from its description. Category names link to the category source, module names to the module's JSON schema file. Counts: required · conditional · optional.</div>
 
     <div class="tabs">
-      <button class="tab on" data-v="bars">By schema</button>
+      <button class="tab on" data-v="bars">By module</button>
       <button class="tab" data-v="rules">Conditional rules</button>
       <button class="tab" data-v="matrix">Shared attributes</button>
+      <button class="tab" data-v="fileid">File identifiers</button>
       <button class="tab" data-v="three">3D explore</button>
     </div>
 
@@ -59,15 +60,15 @@
     </section>
 
     <section class="view" id="v-matrix">
-      <div class="legend"><span><span class="sq" style="background:var(--req)"></span>required in that schema</span>
+      <div class="legend"><span><span class="sq" style="background:var(--req)"></span>required in that module</span>
         <span><span class="sq" style="background:var(--cond)"></span>conditionally required</span>
-        <span><span class="sq" style="background:var(--opt)"></span>optional in that schema</span>
+        <span><span class="sq" style="background:var(--opt)"></span>optional in that module</span>
         <span><span class="sq" style="background:var(--empty);outline:1px solid var(--border)"></span>not used</span>
-        <span><span class="dot" style="background:var(--var)"></span>status differs by schema</span></div>
+        <span><span class="dot" style="background:var(--var)"></span>status differs by module</span></div>
       <div class="ctl">
         <label>Show <select id="mfilter">
-          <option value="2">attributes used by 2+ schemas</option>
-          <option value="varies">only attributes whose status differs by schema</option>
+          <option value="2">attributes used by 2+ modules</option>
+          <option value="varies">only attributes whose status differs by module</option>
           <option value="cond">only conditionally required attributes</option>
           <option value="1">all attributes</option>
         </select></label>
@@ -77,13 +78,39 @@
       <div id="matrixWrap"><div id="matrix"></div></div>
     </section>
 
+    <section class="view" id="v-fileid">
+      <p class="intro" style="margin-top:0">The <a href="https://github.com/BForePC/fileid-kit" target="_blank" rel="noopener">fileid-kit</a> convention (BForePC) gives every file a consistent, traceable identifier across assays and processing stages. It is optional: centers can instead submit their existing de-identified filenames with a sample-to-biospecimen mapping. The identifier encodes participant, specimen index, assay, data type and file number.</p>
+      <div class="idbig" id="idex"></div>
+      <div class="note" style="margin-top:8px">The specimen index (<code>0003</code>) is a number within the filename, not the HTAN biospecimen ID; the manifest must link the two. For a file built from several specimens (ex. a jointly called VCF), record its inputs explicitly rather than relying on the filename.</div>
+
+      <h3 class="h3">Build an identifier</h3>
+      <div class="picker idform">
+        <label>Participant<input id="fParticipant" value="HTA201_4" spellcheck="false"></label>
+        <label>Pool (optional)<input id="fPool" placeholder="ex. 0000" spellcheck="false"></label>
+        <label>Specimen index<input id="fSpecimen" type="number" min="0" max="9999" value="3"></label>
+        <label>Assay<select id="fModality"></select></label>
+        <label>Data type<select id="fTier"></select></label>
+        <label>File number<input id="fSeq" type="number" min="1" max="99999" value="1"></label>
+      </div>
+      <div class="idbig" id="idout"></div>
+      <div id="iderr" class="note err"></div>
+
+      <h3 class="h3">Examples by category</h3>
+      <div class="note">Participant <code>HTA201_4</code>, specimen index <code>0003</code>.</div>
+      <div id="idmods"></div>
+
+      <h3 class="h3">Data type codes</h3>
+      <div class="note">Data types, not pipeline steps.</div>
+      <div id="idtiers"></div>
+    </section>
+
     <section class="view" id="v-three">
       <div class="legend"><span><span class="dot" style="background:var(--req)"></span>always required</span>
         <span><span class="dot" style="background:var(--opt)"></span>always optional</span>
         <span><span class="dot" style="background:var(--cond)"></span>conditional</span>
-        <span><span class="dot" style="background:var(--var)"></span>differs by schema</span>
-        <span><span class="dot" style="background:#b8ab9c"></span>module / schema</span>
-        <span>link color = state in that schema</span></div>
+        <span><span class="dot" style="background:var(--var)"></span>differs by module</span>
+        <span><span class="dot" style="background:#b8ab9c"></span>category / module</span>
+        <span>link color = state in that module</span></div>
       <div id="g3"><div id="gc" style="position:absolute;inset:0"></div><div id="labels"></div><div class="hint3">drag to rotate · scroll to zoom · click a node for details</div></div>
     </section>
   </div>

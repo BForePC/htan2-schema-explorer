@@ -1,6 +1,8 @@
 # HTAN2 Schema Explorer
 
-Interactive view of the [HTAN Phase 2 data model](https://github.com/ncihtan/htan2-data-model): which attributes each schema requires, requires only under a condition (if/then rules), or leaves optional, organized by module and data level.
+Interactive view of the [HTAN Phase 2 data model](https://github.com/ncihtan/htan2-data-model): which attributes each module requires, requires only under a condition (if/then rules), or leaves optional, organized by category and data level.
+
+Terms: a **module** is one JSON schema (ex. `BulkWESLevel1`, `Demographics`); a **category** groups modules (ex. WES, scRNA-seq, Clinical).
 
 The page reads the compiled JSON schemas (`JSON_Schemas/<version>/`) straight from GitHub in the browser, so any branch, release tag or commit of the data model repo, or a fork of it, can be explored without rebuilding the site.
 
@@ -8,13 +10,14 @@ The page reads the compiled JSON schemas (`JSON_Schemas/<version>/`) straight fr
 
 | View | What it shows |
 |---|---|
-| Data level grid | modules x Level 1-4 (+ companion records), each schema with a short description, counts and a required / conditional / optional bar |
-| By schema | one stacked bar per schema, grouped by module |
+| Data level grid | categories x Level 1-4 (+ companion records), each module with a short description, counts and a required / conditional / optional bar |
+| By module | one stacked bar per module, grouped by category |
 | Conditional rules | every if/then rule: "when X" -> "then required: Y" |
-| Shared attributes | attribute x schema matrix for attributes reused across schemas |
-| 3D explore | force-directed graph: HTAN2 -> modules -> schemas -> attributes |
+| Shared attributes | attribute x module matrix for attributes reused across modules |
+| File identifiers | [fileid-kit](https://github.com/BForePC/fileid-kit) naming convention: structure, builder, example ids per category, data type codes |
+| 3D explore | force-directed graph: HTAN2 -> categories -> modules -> attributes |
 
-Clicking a schema or attribute opens a panel with its attributes, rules, permissible values and links to the source files.
+Clicking a module or attribute opens a panel with its attributes, rules, permissible values and links to the source files.
 
 ## Choosing a version
 
@@ -23,7 +26,7 @@ The picker at the top selects:
 - **Repository** - `owner/name`, default `ncihtan/htan2-data-model`
 - **Branch or release tag** - listed from the repo
 - **Commit SHA** - paste and press Enter
-- **Schema version** - the `JSON_Schemas/<version>/` folders present in that commit
+- **Data model version** - the `JSON_Schemas/<version>/` folders present in that commit
 
 The selection is kept in the URL, so a view can be shared or bookmarked:
 
@@ -66,6 +69,7 @@ index.html        page layout
 css/style.css     styles and the color palette (CSS variables at the top)
 js/github.js      branch / tag / tree listing and file fetching (GitHub API, jsDelivr fallback)
 js/model.js       json schemas -> model: module, level, required / conditional / optional, rules, variants
+js/fileid.js      fileid-kit codes, per-category examples, id builder
 js/app.js         rendering: level grid, bars, rules table, matrix, 3D graph, side panel
 .nojekyll         serve files as-is on GitHub Pages
 ```
