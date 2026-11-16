@@ -94,3 +94,11 @@ Required `#c4572f`, conditional `#d9a43a`, optional `#2f6ea8`, status differs `#
 ## Libraries
 
 [D3](https://d3js.org) v7 and [3d-force-graph](https://github.com/vasturiano/3d-force-graph) (three.js + d3-force-3d), loaded from jsDelivr.
+
+## Releasing changes
+
+CSS and JS are referenced with a `?v=<timestamp>` tag so browsers pick up new files instead of GitHub Pages' 10-minute cache. After editing, bump it in `index.html`, `js/app.js` and `js/workbook.js`:
+
+```bash
+V=$(date +%Y%m%d%H%M); sed -i '' -E "s#\?v=[0-9]+#?v=$V#g" index.html js/app.js js/workbook.js
+```

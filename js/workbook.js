@@ -3,7 +3,7 @@
 // one sheet per module, columns ordered pk / required / conditional / optional, header fill by role,
 // enum dropdowns backed by a hidden _EnumValues sheet, comment on conditional headers, Instructions tab.
 
-import { MODULE_DIRS } from './model.js';
+import { MODULE_DIRS } from './model.js?v=202611161217';
 
 const EXCELJS_URL = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
 const ROLE_ORDER = { pk: 0, required: 1, conditional: 2, optional: 3 };
