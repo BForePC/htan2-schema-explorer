@@ -102,3 +102,7 @@ CSS and JS are referenced with a `?v=<timestamp>` tag so browsers pick up new fi
 ```bash
 V=$(date +%Y%m%d%H%M); sed -i '' -E "s#\?v=[0-9]+#?v=$V#g" index.html js/app.js js/workbook.js
 ```
+
+## License
+
+MIT, see [LICENSE](LICENSE).
