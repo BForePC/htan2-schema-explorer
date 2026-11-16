@@ -1,10 +1,10 @@
 
 :root{
   color-scheme:light;
-  --surface:#ffffff; --surface-2:#ece6f5; --border:#dcd2ec; --grid:#eef0f3;
-  --text-primary:#1f2328; --text-secondary:#4b5563; --text-muted:#6b7280;
-  --req:#c4572f; --opt:#2f6ea8; --cond:#d9a43a; --var:#4b5563; --empty:#f1f3f5;
-  --accent:#2f6ea8; --cream:#f5f1fb;
+  --surface:#ffffff; --surface-2:#f7f2ea; --border:#e9e1d4; --grid:#efe8dc;
+  --text-primary:#2b2420; --text-secondary:#5e534b; --text-muted:#8c8076;
+  --req:#c4572f; --opt:#2f6ea8; --cond:#d9a43a; --var:#5b4e45; --empty:#f3ede3;
+  --accent:#2f6ea8; --cream:#fbf6ee;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--surface);color:var(--text-primary);
@@ -65,7 +65,7 @@ table.rt{border-collapse:collapse;width:100%;font-size:14px}
 .rt tr.grp td{background:var(--surface-2);font-weight:600;font-size:14px}
 .rt .w{color:var(--text-secondary)}
 .chip{display:inline-flex;align-items:center;gap:5px;margin:1px 6px 1px 0;cursor:pointer}
-.chip:hover code{background:#e9ecef}
+.chip:hover code{background:#efe6d8}
 .brnote{margin-top:4px;font-size:14px;color:#7a3e1d;background:#fbeee4;border-radius:6px;padding:4px 8px}
 .box{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:14px;color:var(--text-secondary)}
 .box b{color:var(--text-primary)}
@@ -88,7 +88,7 @@ table.lv{table-layout:fixed;border-collapse:separate;border-spacing:0;width:100%
 .lv .what{color:var(--text-secondary);margin:2px 0 4px}
 .lv .mini{display:flex;height:7px;border-radius:4px;overflow:hidden;gap:2px;background:#fff}
 .lv .cnt{color:var(--text-muted);font-size:14px;margin-top:2px;font-variant-numeric:tabular-nums}
-.lv .na{color:#cbd0d6}
+.lv .na{color:#d4c9ba}
 .lv .chips a{font-family:ui-monospace,Menlo,monospace;font-size:14px;color:var(--text-primary);margin-right:10px;white-space:nowrap}
 .lvfig{margin:18px 0 8px;border:1px solid var(--border);border-radius:14px;padding:14px;background:var(--cream)}
 .lvfig img{border-radius:8px}
@@ -100,8 +100,8 @@ table.lv{table-layout:fixed;border-collapse:separate;border-spacing:0;width:100%
 .picker{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin:14px 0 4px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:var(--cream)}
 .picker label{display:flex;flex-direction:column;gap:3px;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
 .picker input,.picker select{min-width:190px;text-transform:none;letter-spacing:0;font-size:14px;padding:7px 9px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text-primary)}
-.picker button{font:inherit;font-size:14px;font-weight:600;padding:8px 16px;border-radius:8px;border:1px solid #6a4c93;background:#6a4c93;color:#fff;cursor:pointer;box-shadow:none}
-.picker button:hover:not(:disabled){background:#573d7a;border-color:#573d7a}
+.picker button{font:inherit;font-size:14px;font-weight:600;padding:8px 16px;border-radius:8px;border:1px solid #2a7f7a;background:#2a7f7a;color:#fff;cursor:pointer;box-shadow:none}
+.picker button:hover:not(:disabled){background:#236c68;border-color:#236c68}
 .picker button:disabled{opacity:.5;cursor:default}
 #status{font-size:14px;color:var(--text-muted);margin:6px 0 0;min-height:18px}
 #status.err{color:#9b2c12}

@@ -283,7 +283,7 @@ function drawRules() {
     if (!rs.length) continue;
     n += rs.length;
     h += `<tr class="grp"><td colspan="2"><span style="cursor:pointer" data-s="${s.id}">${s.id}</span> <span style="font-weight:400;color:var(--text-muted)">· ${moduleLabel(mod)} · ${rs.length} rule${rs.length > 1 ? 's' : ''}</span></td></tr>`;
-    for (const r of rs) h += `<tr><td class="w">${esc(r.when)}</td><td>${r.requires.map(a => chip(a, COL.conditional)).join('')}${r.forbids.length ? `<span style="color:var(--text-muted)">must be left empty: </span>${r.forbids.map(a => chip(a, '#c4c9d0')).join('')}` : ''}</td></tr>`;
+    for (const r of rs) h += `<tr><td class="w">${esc(r.when)}</td><td>${r.requires.map(a => chip(a, COL.conditional)).join('')}${r.forbids.length ? `<span style="color:var(--text-muted)">must be left empty: </span>${r.forbids.map(a => chip(a, '#cbbfb0')).join('')}` : ''}</td></tr>`;
   }
   $('rules').innerHTML = n ? h + '</tbody></table>' : '<div class="note">No if/then rules in this version.</div>';
   $('rcount').textContent = `${n} rules`;
@@ -306,7 +306,7 @@ function drawMatrix() {
   let col = 0;
   M.modules.forEach((m, i) => {
     const n = cols.filter(s => s.module === m).length; if (!n) return;
-    if (i % 2 === 0) svg.append('rect').attr('x', labelW + col * C).attr('y', headH - 4).attr('width', n * C).attr('height', H - headH + 4).attr('fill', '#fafbfc');
+    if (i % 2 === 0) svg.append('rect').attr('x', labelW + col * C).attr('y', headH - 4).attr('width', n * C).attr('height', H - headH + 4).attr('fill', '#fbf7f1');
     col += n;
   });
   cols.forEach((s, i) => {
@@ -373,9 +373,9 @@ async function render3D() {
     G = ForceGraph3D({ controlType: 'orbit' })($('gc'))
       .width(box.clientWidth).height(box.clientHeight).backgroundColor('#ffffff').showNavInfo(false)
       .nodeRelSize(2).nodeVal(n => Math.pow(size(n), 3) / 8).nodeResolution(12).nodeOpacity(1)
-      .nodeColor(n => (n.kind === 'attr' ? COL[n.a.status] : n.kind === 'schema' ? '#d1d5db' : n.kind === 'module' ? '#9ca3af' : '#6b7280'))
+      .nodeColor(n => (n.kind === 'attr' ? COL[n.a.status] : n.kind === 'schema' ? '#d6cbbd' : n.kind === 'module' ? '#b8ab9c' : '#8c8076'))
       .nodeLabel(() => '')
-      .linkColor(l => (l.kind === 'hub' ? '#d1d5db' : COL[l.kind])).linkOpacity(0.45)
+      .linkColor(l => (l.kind === 'hub' ? '#d6cbbd' : COL[l.kind])).linkOpacity(0.45)
       .onNodeHover(n => { box.style.cursor = n ? 'pointer' : null; hov = n; if (!n) hideTip(); })
       .onNodeClick(n => { if (n.kind === 'attr') openAttr(n.a.id); else if (n.kind === 'schema') openSchema(n.s.id); });
     G.d3Force('link').distance(l => (l.kind === 'hub' ? ((l.source.id || l.source) === '__root' ? 120 : 70) : 38)).strength(l => (l.kind === 'hub' ? 0.9 : 0.25));
@@ -430,7 +430,7 @@ addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout((
 
 // ---------------------------------------------------------------- file identifiers
 const SEG = {
-  participant: ['participant', '#6b4f8a'], pool: ['pool', '#8a7a4f'], marker: ['file marker', '#9ca3af'],
+  participant: ['participant', '#6b4f8a'], pool: ['pool', '#8a7a4f'], marker: ['file marker', '#b8ab9c'],
   specimen: ['specimen index', '#2e7d6e'], modality: ['assay', '#a0446b'], tier: ['data type', '#3f6fa6'], seq: ['file number', '#b0782a'],
 };
 // fileid-kit readme section for each id part
