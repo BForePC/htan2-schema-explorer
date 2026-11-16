@@ -8,12 +8,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.79.1/dist/3d-force-graph.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head>
 <body>
 <div class="wrap">
-  <h1>HTAN2 data model: what is required, conditional and optional</h1>
+  <h1>HTAN2 data model levels: what is required, conditional and optional</h1>
   <div class="sub" id="sub">Loading...</div>
   <div class="links" id="links"></div>
 
@@ -50,7 +49,6 @@
       <div class="legend"><span><span class="sq" style="background:var(--req)"></span>required attributes</span>
         <span><span class="sq" style="background:var(--cond)"></span>required only when a condition is met</span>
         <span><span class="sq" style="background:var(--opt)"></span>optional attributes</span></div>
-      <div class="note">Click a schema to list its attributes and rules.</div>
       <div id="bars"></div>
     </section>
 
@@ -90,7 +88,6 @@
     </section>
   </div>
 
-  <footer class="note" style="margin-top:28px">Data is read live from GitHub in your browser (GitHub API, falling back to jsDelivr). Not an official HTAN product.</footer>
 </div>
 
 <div id="tip"></div>

@@ -92,7 +92,7 @@ table.lv{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;bor
 .lv .chips a{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--text-primary);margin-right:10px;white-space:nowrap}
 .lvfig{margin:18px 0 8px;border:1px solid var(--border);border-radius:14px;padding:14px;background:var(--cream)}
 .lvfig img{border-radius:8px}
-.lvfig img{display:block;width:100%;max-width:900px;height:auto;margin:0 auto}
+.lvfig img{display:block;width:100%;max-width:560px;height:auto;margin:0 auto}
 .lvfig figcaption{color:var(--text-muted);font-size:12px;margin-top:6px;text-align:center}
 .lvfig figcaption a{color:var(--text-secondary)}
 @media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:18px 14px 40px}}

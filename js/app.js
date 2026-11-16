@@ -87,8 +87,8 @@ async function start() {
   const q = readQuery();
   $('repo').value = q.repo;
   try {
-    await fillRefs(q.repo, q.ref);
-    commitCache = await fillVersions(q.repo, q.ref, q.version);
+    const [, commit] = await Promise.all([fillRefs(q.repo, q.ref), fillVersions(q.repo, q.ref, q.version)]);
+    commitCache = commit;
     if (commitCache) await load(q.repo, q.ref, $('ver').value, commitCache);
   } catch (e) { console.error(e); status(`Could not reach ${q.repo}: ${e.message}`, true); }
 }
@@ -191,6 +191,12 @@ function renderLevels() {
   const assay = M.modules.filter(m => !METADATA_MODULES.has(m) && M.schemas.some(s => s.module === m && s.levels.length));
   const meta = M.modules.filter(m => !assay.includes(m));
   let h = `<thead><tr><th>Module</th>${Array.from({ length: maxL }, (_, i) => `<th>Level ${i + 1}</th>`).join('')}<th>Companion record</th></tr></thead><tbody>`;
+  if (meta.length) {
+    const ms = M.schemas.filter(s => meta.includes(s.module));
+    h += `<tr><td class="m">${meta.map(m => `<a href="${modUrl(m)}" target="_blank" rel="noopener">${moduleLabel(m)}</a>`).join(' &amp; ')}</td>
+      <td colspan="${maxL + 1}"><div class="what" style="margin-top:0">no data level - participant and sample metadata; click a name for its attributes</div>
+      <div class="chips">${ms.map(s => `<a href="#" data-s="${s.id}">${s.id}</a>`).join('')}</div></td></tr>`;
+  }
   for (const m of assay) {
     const ss = M.schemas.filter(s => s.module === m);
     h += `<tr><td class="m"><a href="${modUrl(m)}" target="_blank" rel="noopener">${moduleLabel(m)}</a></td>`;
@@ -201,12 +207,6 @@ function renderLevels() {
     }
     const comp = ss.filter(s => !s.levels.length);
     h += `<td>${comp.length ? comp.map(cellHtml).join('') : '<span class="na">-</span>'}</td></tr>`;
-  }
-  if (meta.length) {
-    const ms = M.schemas.filter(s => meta.includes(s.module));
-    h += `<tr><td class="m">${meta.map(m => `<a href="${modUrl(m)}" target="_blank" rel="noopener">${moduleLabel(m)}</a>`).join(' &amp; ')}</td>
-      <td colspan="${maxL + 1}"><div class="what" style="margin-top:0">no data level - participant and sample metadata; click a name for its attributes</div>
-      <div class="chips">${ms.map(s => `<a href="#" data-s="${s.id}">${s.id}</a>`).join('')}</div></td></tr>`;
   }
   $('levels').innerHTML = h + '</tbody>';
 }
@@ -332,8 +332,22 @@ function graphData() {
   M.attributes.forEach(a => a.in.forEach(([s, r]) => links.push({ source: 'S:' + s, target: 'A:' + a.id, kind: { R: 'required', C: 'conditional', O: 'optional' }[r] })));
   return { nodes, links };
 }
-function render3D() {
+let lib3d = null;
+const load3D = () => lib3d || (lib3d = new Promise((ok, fail) => {
+  const el = document.createElement('script');
+  el.src = 'https://cdn.jsdelivr.net/npm/3d-force-graph@1.79.1/dist/3d-force-graph.min.js';
+  el.onload = ok; el.onerror = () => { lib3d = null; fail(new Error('could not load 3D library')); };
+  document.head.appendChild(el);
+}));
+async function render3D() {
   const box = $('g3');
+  if (!window.ForceGraph3D) {
+    const prev = $('status').textContent;
+    status('Loading 3D view...');
+    try { await load3D(); } catch (e) { status(e.message, true); return; }
+    status(prev);
+  }
+  if (tab !== 'three') return;
   const data = graphData();
   if (!G) {
     const size = n => (n.kind === 'root' ? 14 : n.kind === 'module' ? 9 : n.kind === 'schema' ? 2 + Math.sqrt(n.s.n) * 0.9

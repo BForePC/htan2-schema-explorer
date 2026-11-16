@@ -14,6 +14,17 @@ function cacheSet(key, value) {
   try { sessionStorage.setItem(key, JSON.stringify(value)); } catch { /* quota or disabled storage */ }
 }
 
+// commit-pinned files never change: keep them across visits in the cache api (handles multi-MB files)
+const FILES = 'htan2-files-v1';
+async function getPinned(url) {
+  let store = null;
+  try { store = await caches.open(FILES); const hit = await store.match(url); if (hit) return await hit.json(); } catch { /* no cache api */ }
+  const res = await fetch(url);
+  if (!res.ok) throw Object.assign(new Error(`${res.status} ${res.statusText} for ${url}`), { status: res.status });
+  if (store) store.put(url, res.clone()).catch(() => {});
+  return res.json();
+}
+
 async function getJSON(url, { cache = true } = {}) {
   if (cache) { const hit = cacheGet(url); if (hit) return hit; }
   const res = await fetch(url, { headers: { Accept: 'application/vnd.github+json' } });
@@ -48,11 +59,23 @@ export async function listRefs(repo) {
 }
 
 // resolve a branch / tag / sha to a commit, then list the json schema folders in that commit
+const BRANCH_TTL = 5 * 60 * 1000;
+function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* quota or disabled */ } }
+
 export async function resolve(repo, ref) {
+  const key = `htan2:${repo}@${ref}`, hit = lsGet(key);
+  if (hit && (!isBranchLike(ref) || Date.now() - hit.at < BRANCH_TTL)) return hit.c;
+  const c = await resolveLive(repo, ref);
+  if (c.source === 'github') lsSet(key, { at: Date.now(), c });
+  return c;
+}
+
+async function resolveLive(repo, ref) {
   try {
-    const c = await getJSON(`${API}/repos/${repo}/commits/${encodeURIComponent(ref)}`, { cache: !isBranchLike(ref) });
-    const tree = await getJSON(`${API}/repos/${repo}/git/trees/${c.sha}?recursive=1`);
-    const paths = tree.tree.filter(t => t.type === 'blob').map(t => t.path);
+    const c = await getJSON(`${API}/repos/${repo}/commits/${encodeURIComponent(ref)}`, { cache: false });
+    const tree = await getJSON(`${API}/repos/${repo}/git/trees/${c.sha}?recursive=1`, { cache: false });
+    const paths = tree.tree.filter(t => t.type === 'blob' && t.path.startsWith('JSON_Schemas/')).map(t => t.path);
     return {
       sha: c.sha, date: c.commit.committer.date.slice(0, 10), message: c.commit.message.split('\n')[0],
       paths, source: 'github', truncated: !!tree.truncated,
@@ -79,7 +102,7 @@ export async function fetchFile(repo, commit, path) {
     : [`${JSD_CDN}/${repo}@${commit.sha}/${path}`];
   let last;
   for (const u of urls) {
-    try { return await getJSON(u, { cache: commit.source === 'github' }); } catch (e) { last = e; }
+    try { return commit.source === 'github' ? await getPinned(u) : await getJSON(u, { cache: false }); } catch (e) { last = e; }
   }
   throw last;
 }
