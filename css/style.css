@@ -1,10 +1,10 @@
 
 :root{
   color-scheme:light;
-  --surface:#ffffff; --surface-2:#f7f2ea; --border:#e9e1d4; --grid:#efe8dc;
-  --text-primary:#2b2420; --text-secondary:#5e534b; --text-muted:#8c8076;
-  --req:#c4572f; --opt:#2f6ea8; --cond:#d9a43a; --var:#5b4e45; --empty:#f3ede3;
-  --accent:#2f6ea8; --cream:#fbf6ee;
+  --surface:#ffffff; --surface-2:#f4f5f7; --border:#e5e7eb; --grid:#eef0f3;
+  --text-primary:#1f2328; --text-secondary:#4b5563; --text-muted:#6b7280;
+  --req:#c4572f; --opt:#2f6ea8; --cond:#d9a43a; --var:#4b5563; --empty:#f1f3f5;
+  --accent:#2f6ea8; --cream:#f8f9fa;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--surface);color:var(--text-primary);
@@ -65,7 +65,7 @@ table.rt{border-collapse:collapse;width:100%;font-size:13px}
 .rt tr.grp td{background:var(--surface-2);font-weight:600;font-size:13px}
 .rt .w{color:var(--text-secondary)}
 .chip{display:inline-flex;align-items:center;gap:5px;margin:1px 6px 1px 0;cursor:pointer}
-.chip:hover code{background:#efe6d8}
+.chip:hover code{background:#e9ecef}
 .brnote{margin-top:4px;font-size:13px;color:#7a3e1d;background:#fbeee4;border-radius:6px;padding:4px 8px}
 .box{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--text-secondary)}
 .box b{color:var(--text-primary)}
@@ -88,7 +88,7 @@ table.lv{table-layout:fixed;border-collapse:separate;border-spacing:0;width:100%
 .lv .what{color:var(--text-secondary);margin:2px 0 4px}
 .lv .mini{display:flex;height:7px;border-radius:4px;overflow:hidden;gap:2px;background:#fff}
 .lv .cnt{color:var(--text-muted);font-size:13px;margin-top:2px;font-variant-numeric:tabular-nums}
-.lv .na{color:#d4c9ba}
+.lv .na{color:#cbd0d6}
 .lv .chips a{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--text-primary);margin-right:10px;white-space:nowrap}
 .lvfig{margin:18px 0 8px;border:1px solid var(--border);border-radius:14px;padding:14px;background:var(--cream)}
 .lvfig img{border-radius:8px}
@@ -118,3 +118,5 @@ table.lv{table-layout:fixed;border-collapse:separate;border-spacing:0;width:100%
 .idform select{min-width:220px}
 .note.err{color:var(--req);margin-top:6px}
 .rt td.id{white-space:nowrap}
+.idbig a.seg{color:inherit;text-decoration:none}
+.idbig a.seg:hover{background:var(--grid)}

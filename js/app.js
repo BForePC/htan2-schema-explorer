@@ -267,7 +267,7 @@ function drawRules() {
     if (!rs.length) continue;
     n += rs.length;
     h += `<tr class="grp"><td colspan="2"><span style="cursor:pointer" data-s="${s.id}">${s.id}</span> <span style="font-weight:400;color:var(--text-muted)">· ${moduleLabel(mod)} · ${rs.length} rule${rs.length > 1 ? 's' : ''}</span></td></tr>`;
-    for (const r of rs) h += `<tr><td class="w">${esc(r.when)}</td><td>${r.requires.map(a => chip(a, COL.conditional)).join('')}${r.forbids.length ? `<span style="color:var(--text-muted)">must be left empty: </span>${r.forbids.map(a => chip(a, '#cbbfb0')).join('')}` : ''}</td></tr>`;
+    for (const r of rs) h += `<tr><td class="w">${esc(r.when)}</td><td>${r.requires.map(a => chip(a, COL.conditional)).join('')}${r.forbids.length ? `<span style="color:var(--text-muted)">must be left empty: </span>${r.forbids.map(a => chip(a, '#c4c9d0')).join('')}` : ''}</td></tr>`;
   }
   $('rules').innerHTML = n ? h + '</tbody></table>' : '<div class="note">No if/then rules in this version.</div>';
   $('rcount').textContent = `${n} rules`;
@@ -290,7 +290,7 @@ function drawMatrix() {
   let col = 0;
   M.modules.forEach((m, i) => {
     const n = cols.filter(s => s.module === m).length; if (!n) return;
-    if (i % 2 === 0) svg.append('rect').attr('x', labelW + col * C).attr('y', headH - 4).attr('width', n * C).attr('height', H - headH + 4).attr('fill', '#fbf7f1');
+    if (i % 2 === 0) svg.append('rect').attr('x', labelW + col * C).attr('y', headH - 4).attr('width', n * C).attr('height', H - headH + 4).attr('fill', '#fafbfc');
     col += n;
   });
   cols.forEach((s, i) => {
@@ -355,11 +355,11 @@ async function render3D() {
     const size = n => (n.kind === 'root' ? 14 : n.kind === 'module' ? 9 : n.kind === 'schema' ? 2 + Math.sqrt(n.s.n) * 0.9
       : (n.a.status === 'optional' ? 1.1 : 1.8) * (1 + Math.min(n.a.in.length - 1, 20) * 0.06));
     G = ForceGraph3D({ controlType: 'orbit' })($('gc'))
-      .width(box.clientWidth).height(box.clientHeight).backgroundColor('#fffdf9').showNavInfo(false)
+      .width(box.clientWidth).height(box.clientHeight).backgroundColor('#ffffff').showNavInfo(false)
       .nodeRelSize(2).nodeVal(n => Math.pow(size(n), 3) / 8).nodeResolution(12).nodeOpacity(1)
-      .nodeColor(n => (n.kind === 'attr' ? COL[n.a.status] : n.kind === 'schema' ? '#d6cbbd' : n.kind === 'module' ? '#b8ab9c' : '#8c8076'))
+      .nodeColor(n => (n.kind === 'attr' ? COL[n.a.status] : n.kind === 'schema' ? '#d1d5db' : n.kind === 'module' ? '#9ca3af' : '#6b7280'))
       .nodeLabel(() => '')
-      .linkColor(l => (l.kind === 'hub' ? '#d6cbbd' : COL[l.kind])).linkOpacity(0.45)
+      .linkColor(l => (l.kind === 'hub' ? '#d1d5db' : COL[l.kind])).linkOpacity(0.45)
       .onNodeHover(n => { box.style.cursor = n ? 'pointer' : null; hov = n; if (!n) hideTip(); })
       .onNodeClick(n => { if (n.kind === 'attr') openAttr(n.a.id); else if (n.kind === 'schema') openSchema(n.s.id); });
     G.d3Force('link').distance(l => (l.kind === 'hub' ? ((l.source.id || l.source) === '__root' ? 120 : 70) : 38)).strength(l => (l.kind === 'hub' ? 0.9 : 0.25));
@@ -414,14 +414,17 @@ addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout((
 
 // ---------------------------------------------------------------- file identifiers
 const SEG = {
-  participant: ['participant', '#6b4f8a'], pool: ['pool', '#8a7a4f'], marker: ['file marker', '#a69a8e'],
+  participant: ['participant', '#6b4f8a'], pool: ['pool', '#8a7a4f'], marker: ['file marker', '#9ca3af'],
   specimen: ['specimen index', '#2e7d6e'], modality: ['assay', '#a0446b'], tier: ['data type', '#3f6fa6'], seq: ['file number', '#b0782a'],
 };
+// fileid-kit readme section for each id part
+const SEG_DOC = { modality: '#modality-codes', tier: '#tier-codes', pool: '#valid-formats' };
+const segDoc = k => KIT_URL + (SEG_DOC[k] || '#components');
 const modName = c => (MODALITIES.find(m => m[0] === c) || [, c])[1];
 const tierName = c => (TIERS.find(t => t[0] === c) || [, c])[1];
 function segHtml(segs, copy) {
   const sub = { modality: v => modName(v), tier: v => tierName(v) };
-  return segs.map(([k, v]) => `<span class="seg" style="--sc:${SEG[k][1]}">${esc(v)}<small>${SEG[k][0]}${sub[k] ? ': ' + esc(sub[k](v)) : ''}</small></span>`).join('')
+  return segs.map(([k, v]) => `<a class="seg" href="${segDoc(k)}" target="_blank" rel="noopener" title="fileid-kit: ${SEG[k][0]}" style="--sc:${SEG[k][1]}">${esc(v)}<small>${SEG[k][0]}${sub[k] ? ': ' + esc(sub[k](v)) : ''} ↗</small></a>`).join('')
     + (copy ? `<button class="copy" data-copy="${esc(copy)}">copy</button>` : '');
 }
 function drawBuilder() {
@@ -436,8 +439,6 @@ function initFileId() {
   $('fTier').innerHTML = TIERS.map(([c, n]) => `<option value="${c}">${c} ${esc(n)}</option>`).join('');
   $('fModality').value = '19';
   ['fParticipant', 'fPool', 'fSpecimen', 'fModality', 'fTier', 'fSeq'].forEach(id => $(id).addEventListener('input', drawBuilder));
-  $('idtiers').innerHTML = `<table class="rt"><thead><tr><th>Code</th><th>Data type</th><th>Typical files</th></tr></thead><tbody>${
-    TIERS.map(([c, n, f]) => `<tr><td><code>${c}</code></td><td>${esc(n)}</td><td class="w">${esc(f)}</td></tr>`).join('')}</tbody></table>`;
   document.getElementById('v-fileid').addEventListener('click', e => {
     const b = e.target.closest('[data-copy]'); if (!b) return;
     navigator.clipboard.writeText(b.dataset.copy).then(() => { b.textContent = 'copied'; setTimeout(() => (b.textContent = 'copy'), 1200); }, () => {});
@@ -450,7 +451,7 @@ function renderFileIdModules() {
   for (const m of mods) {
     const ex = MODULE_EXAMPLES[m];
     h += `<tr class="grp"><td colspan="4">${moduleLabel(m)} <span style="font-weight:400;color:var(--text-muted)">· ${
-      ex.code ? `assay code ${ex.code} (${esc(modName(ex.code))})` : ''}${ex.note ? (ex.code ? ' · ' : '') + esc(ex.note) : ''}</span></td></tr>`;
+      ex.code ? `<a href="${segDoc('modality')}" target="_blank" rel="noopener">assay code ${ex.code}</a> (${esc(modName(ex.code))})` : ''}${ex.note ? (ex.code ? ' · ' : '') + esc(ex.note) : ''}</span></td></tr>`;
     for (const [lv, file, tier, seq, fmt] of ex.rows || []) {
       h += `<tr><td>${lv}</td><td>${esc(file)}</td><td class="id"><code>${exampleId('HTA201_4', 3, ex.code, tier, seq)}</code></td><td class="w">${esc(fmt)}</td></tr>`;
     }
