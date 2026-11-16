@@ -4,9 +4,10 @@
   --surface:#ffffff; --surface-2:#f7f2ea; --border:#e9e1d4; --grid:#efe8dc;
   --text-primary:#2b2420; --text-secondary:#5e534b; --text-muted:#8c8076;
   --req:#c4572f; --opt:#2f6ea8; --cond:#d9a43a; --var:#5b4e45; --empty:#f3ede3;
-  --accent:#2f6ea8; --cream:#fbf6ee;
+  --accent:#62949c; --cream:#fbf6ee;
 }
 *{box-sizing:border-box}
+a{color:var(--accent)}
 html,body{margin:0;background:var(--surface);color:var(--text-primary);
   font:15px/1.5 Arial,Helvetica,sans-serif}
 .wrap{max-width:1180px;margin:0 auto;padding:28px 28px 60px}
@@ -94,14 +95,14 @@ table.lv{table-layout:fixed;border-collapse:separate;border-spacing:0;width:100%
 .lvfig img{border-radius:8px}
 .lvfig img{display:block;width:100%;max-width:720px;height:auto;margin:0 auto}
 .lvfig figcaption{color:var(--text-muted);font-size:14px;margin-top:6px;text-align:center}
-.lvfig figcaption a{color:var(--text-secondary)}
+.lvfig figcaption a{color:var(--accent)}
 @media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}.wrap{padding:18px 14px 40px}}
 
 .picker{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin:14px 0 4px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:var(--cream)}
 .picker label{display:flex;flex-direction:column;gap:3px;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
 .picker input,.picker select{min-width:190px;text-transform:none;letter-spacing:0;font-size:14px;padding:7px 9px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text-primary)}
-.picker button{font:inherit;font-size:14px;font-weight:600;padding:8px 16px;border-radius:8px;border:1px solid #2a7f7a;background:#2a7f7a;color:#fff;cursor:pointer;box-shadow:none}
-.picker button:hover:not(:disabled){background:#236c68;border-color:#236c68}
+.picker button{font:inherit;font-size:13px;font-weight:600;padding:5px 12px;border-radius:7px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;box-shadow:none}
+.picker button:hover:not(:disabled){background:#4f7d84;border-color:#4f7d84}
 .picker button:disabled{opacity:.5;cursor:default}
 #status{font-size:14px;color:var(--text-muted);margin:6px 0 0;min-height:18px}
 #status.err{color:#9b2c12}
