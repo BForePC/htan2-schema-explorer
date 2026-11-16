@@ -1,7 +1,7 @@
-import { listRefs, resolve, schemaVersions, schemaFiles, fetchFile, githubUrl } from './github.js?v=202611161217';
-import { buildModel, moduleLabel, MODULE_DIRS, METADATA_MODULES } from './model.js?v=202611161217';
-import { buildWorkbook, download, workbookOrder } from './workbook.js?v=202611161217';
-import { KIT_URL, MODALITIES, TIERS, MODULE_EXAMPLES, buildId, exampleId } from './fileid.js?v=202611161217';
+import { listRefs, resolve, schemaVersions, schemaFiles, fetchFile, githubUrl } from './github.js?v=202611161219';
+import { buildModel, moduleLabel, MODULE_DIRS, METADATA_MODULES } from './model.js?v=202611161219';
+import { buildWorkbook, download, workbookOrder } from './workbook.js?v=202611161219';
+import { KIT_URL, MODALITIES, TIERS, MODULE_EXAMPLES, buildId, exampleId } from './fileid.js?v=202611161219';
 
 const DEFAULT_REPO = 'ncihtan/htan2-data-model';
 const $ = id => document.getElementById(id);
