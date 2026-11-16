@@ -1,0 +1,57 @@
+name: Upstream schema check
+
+# hourly: compare ncihtan/htan2-data-model main with data/upstream.json.
+# commits the new state when any JSON_Schemas/<version>/ folder is added, changed or removed,
+# and opens an issue for each new version folder. the site itself reads main live and needs no rebuild.
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: upstream-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare with upstream main
+        id: cmp
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/upstream_check.py
+
+      - name: Commit new state
+        if: steps.cmp.outputs.changed == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/upstream.json
+          git commit -m "Upstream ncihtan/htan2-data-model@${{ steps.cmp.outputs.short }}: ${{ steps.cmp.outputs.summary }}"
+          git push
+
+      - name: Open issue for new versions
+        if: steps.cmp.outputs.new_versions != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSIONS: ${{ steps.cmp.outputs.new_versions }}
+          SHA: ${{ steps.cmp.outputs.sha }}
+        run: |
+          for v in ${VERSIONS//,/ }; do
+            gh issue create \
+              --title "New HTAN2 schema version on main: $v" \
+              --body "ncihtan/htan2-data-model \`main\` (${SHA:0:7}) now has \`JSON_Schemas/$v/\`.
+
+          - schema files: https://github.com/ncihtan/htan2-data-model/tree/$SHA/JSON_Schemas/$v
+          - explorer: https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/?ref=main&v=$v
+
+          The explorer already shows it (it reads main live). Check the level grid and module names (\`MODULES\` / \`MODULE_DIRS\` in js/model.js) for any new module."
+          done

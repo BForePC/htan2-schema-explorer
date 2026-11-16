@@ -1,0 +1,17 @@
+{
+  "repo": "ncihtan/htan2-data-model",
+  "branch": "main",
+  "commit": "0f13d60b9afa8a9b9629331f5121dc050cb70c93",
+  "commit_date": "2026-09-30T19:32:19Z",
+  "versions": {
+    "v0.1.12": "abe26c4d015fc72b4dd233b676cbc232ae13e887",
+    "v0.1.13": "05fe660f216b78ae4e3ef26146bdd8e7355ec208",
+    "v1.0.0": "beebccf1fab06b93235cf0790c88fe39695948d1",
+    "v1.1.0": "3421df10a3038aef74c31bf6c18cda968c448e38",
+    "v1.2.0": "17d8bdf0228a5480fad46e4668d9b49a07cf16cd",
+    "v1.3.0": "2f933d5878518043ef65136445ab48e12d1d29e8",
+    "v1.4.0": "b2650f194117cc7ffaff084ee2740e4e46c01995",
+    "v1.5.0": "b13f12ad2d1c48df68dc7c00d07552a01636a2a4",
+    "v2.0.0": "c8450611cf8be85cf3c8bf506e69d7e5ce2d986b"
+  }
+}
