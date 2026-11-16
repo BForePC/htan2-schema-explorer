@@ -243,21 +243,21 @@ function renderBars() {
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).attr('role', 'img')
     .attr('aria-label', 'Required, conditional and optional attribute counts per module');
   svg.append('g').attr('class', 'axis').attr('transform', 'translate(0,20)').call(d3.axisTop(x).ticks(6).tickSize(-(H - 28)))
-    .call(g => g.select('.domain').remove()).call(g => g.selectAll('text').attr('font-size', 13)).call(g => g.selectAll('line').attr('stroke', 'var(--grid)'));
+    .call(g => g.select('.domain').remove()).call(g => g.selectAll('text').attr('font-size', 14)).call(g => g.selectAll('line').attr('stroke', 'var(--grid)'));
   svg.append('text').attr('x', W - countW + 8).attr('y', 14).attr('class', 'modlbl').text('req + cond / total');
   let y = 26;
   for (const r of rows) {
     if (r.mod) { svg.append('text').attr('class', 'modlbl').attr('x', 0).attr('y', y + MH - 9).text(r.mod); y += MH; continue; }
     const s = r.s, g = svg.append('g').attr('class', 'row').attr('transform', `translate(0,${y})`);
     g.append('rect').attr('class', 'bg').attr('width', W).attr('height', RH).attr('fill', 'transparent').attr('rx', 4);
-    g.append('text').attr('x', 10).attr('y', RH / 2).attr('dy', '.35em').attr('font-size', 13).text(s.id);
+    g.append('text').attr('x', 10).attr('y', RH / 2).attr('dy', '.35em').attr('font-size', 14).text(s.id);
     const bh = 14, by = (RH - bh) / 2; let acc = 0;
     [[s.nreq, COL.required], [s.ncond, COL.conditional], [s.n - s.nreq - s.ncond, COL.optional]].forEach(([v, c]) => {
       if (!v) return; const a0 = x(acc), a1 = x(acc + v); acc += v;
       const gap = a0 > x(0) ? 1 : 0;
       g.append('rect').attr('x', a0 + gap).attr('y', by).attr('height', bh).attr('width', Math.max(1, a1 - a0 - gap - 1)).attr('fill', c).attr('rx', 2);
     });
-    g.append('text').attr('x', W - countW + 8).attr('y', RH / 2).attr('dy', '.35em').attr('font-size', 13)
+    g.append('text').attr('x', W - countW + 8).attr('y', RH / 2).attr('dy', '.35em').attr('font-size', 14)
       .html(`<tspan font-weight="600">${s.nreq}</tspan>${s.ncond ? `<tspan fill="var(--text-muted)"> + </tspan><tspan font-weight="600" fill="${COND_TEXT}">${s.ncond}</tspan>` : ''}<tspan fill="var(--text-muted)"> / ${s.n}</tspan>`);
     g.on('mousemove', e => showTip(`<b>${s.id}</b><div class="m">${s.nreq} required · ${s.ncond} conditional · ${s.n - s.nreq - s.ncond} optional</div><div class="m">${esc(s.description)}</div>`, e))
       .on('mouseleave', hideTip).on('click', () => { hideTip(); openSchema(s.id); });
@@ -299,7 +299,7 @@ function drawMatrix() {
   if (q) rows = rows.filter(a => a.id.toLowerCase().includes(q));
   rows.sort((a, b) => d3.descending(a.in.length, b.in.length) || d3.descending(a.nreq, b.nreq) || d3.ascending(a.id, b.id));
   $('mcount').textContent = `${rows.length} attributes`;
-  const C = 18, labelW = 340, headH = 230, W = labelW + cols.length * C + 60, H = headH + rows.length * C + 10;
+  const C = 19, labelW = 360, headH = 240, W = labelW + cols.length * C + 60, H = headH + rows.length * C + 10;
   const el = $('matrix'); el.innerHTML = '';
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
   let col = 0;
@@ -309,7 +309,7 @@ function drawMatrix() {
     col += n;
   });
   cols.forEach((s, i) => {
-    svg.append('text').attr('transform', `translate(${labelW + i * C + C / 2 + 4},${headH - 8}) rotate(-60)`).attr('font-size', 13)
+    svg.append('text').attr('transform', `translate(${labelW + i * C + C / 2 + 4},${headH - 8}) rotate(-60)`).attr('font-size', 14)
       .attr('fill', 'var(--text-secondary)').style('cursor', 'pointer').text(s.id).on('click', () => openSchema(s.id))
       .on('mousemove', e => showTip(`<b>${s.id}</b><div class="m">${moduleLabel(s.module)}</div>`, e)).on('mouseleave', hideTip);
   });
@@ -317,8 +317,8 @@ function drawMatrix() {
     const y = headH + r * C, g = svg.append('g').style('cursor', 'pointer');
     g.append('rect').attr('y', y).attr('width', W).attr('height', C).attr('fill', 'transparent').attr('class', 'rowbg');
     if (a.status === 'varies') g.append('circle').attr('cx', 6).attr('cy', y + C / 2).attr('r', 4).attr('fill', COL.varies);
-    g.append('text').attr('x', 16).attr('y', y + C / 2).attr('dy', '.35em').attr('font-size', 13).attr('font-family', 'ui-monospace,Menlo,monospace').text(a.id);
-    g.append('text').attr('x', labelW - 8).attr('y', y + C / 2).attr('dy', '.35em').attr('font-size', 13).attr('text-anchor', 'end').attr('fill', 'var(--text-muted)').text(a.in.length);
+    g.append('text').attr('x', 16).attr('y', y + C / 2).attr('dy', '.35em').attr('font-size', 14).attr('font-family', 'ui-monospace,Menlo,monospace').text(a.id);
+    g.append('text').attr('x', labelW - 8).attr('y', y + C / 2).attr('dy', '.35em').attr('font-size', 14).attr('text-anchor', 'end').attr('fill', 'var(--text-muted)').text(a.in.length);
     const used = new Map(a.in);
     cols.forEach((s, i) => {
       const u = used.get(s.id);
@@ -331,7 +331,7 @@ function drawMatrix() {
       .on('mouseenter', function () { d3.select(this).select('.rowbg').attr('fill', 'var(--surface-2)'); })
       .on('mouseleave', function () { d3.select(this).select('.rowbg').attr('fill', 'transparent'); });
   });
-  svg.append('text').attr('x', labelW - 8).attr('y', headH - 8).attr('text-anchor', 'end').attr('font-size', 13).attr('fill', 'var(--text-muted)').text('# modules');
+  svg.append('text').attr('x', labelW - 8).attr('y', headH - 8).attr('text-anchor', 'end').attr('font-size', 14).attr('fill', 'var(--text-muted)').text('# modules');
 }
 $('mfilter').onchange = drawMatrix;
 $('mq').oninput = drawMatrix;
