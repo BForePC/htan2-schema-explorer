@@ -17,6 +17,18 @@ The page reads the compiled JSON schemas (`JSON_Schemas/<version>/`) straight fr
 | File identifiers | [fileid-kit](https://github.com/BForePC/fileid-kit) naming convention: structure, builder, example ids per category, data type codes |
 | 3D explore | force-directed graph: HTAN2 -> categories -> modules -> attributes |
 
+## Blank workbook
+
+**Download blank workbook (.xlsx)** builds an empty submission workbook for the loaded version, in the browser. It ports the `htan` profile of BioTreeBridge `preprocessing/htan2/workbook_gen` (no BForePC extensions, no carried sheets, no data):
+
+- one sheet per module, in workbook_gen sheet order (Clinical, Biospecimen, DigitalPathology, MultiplexMicroscopy, SpatialOmics, WES, scRNA-seq, then others)
+- columns: primary key, required, conditional, optional; alphabetical within each
+- header fill by role: teal primary key, red required, lavender conditional, mint optional; comment on conditional headers naming the trigger
+- enum dropdowns (rows 2-5000) backed by a hidden `_EnumValues` sheet; Instructions tab with legend and source commit
+- conditional fields include rules written as a top-level `if/then` (single-rule schemas), not only `allOf`
+
+Library: [ExcelJS](https://github.com/exceljs/exceljs) 4.4.0, loaded on first click.
+
 Clicking a module or attribute opens a panel with its attributes, rules, permissible values and links to the source files.
 
 ## Choosing a version
@@ -69,6 +81,7 @@ index.html        page layout
 css/style.css     styles and the color palette (CSS variables at the top)
 js/github.js      branch / tag / tree listing and file fetching (GitHub API, jsDelivr fallback)
 js/model.js       json schemas -> model: module, level, required / conditional / optional, rules, variants
+js/workbook.js    blank xlsx workbook (port of workbook_gen htan profile)
 js/fileid.js      fileid-kit codes, per-category examples, id builder
 js/app.js         rendering: level grid, bars, rules table, matrix, 3D graph, side panel
 .nojekyll         serve files as-is on GitHub Pages

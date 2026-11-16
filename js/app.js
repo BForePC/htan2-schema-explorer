@@ -1,5 +1,6 @@
 import { listRefs, resolve, schemaVersions, schemaFiles, fetchFile, githubUrl } from './github.js';
 import { buildModel, moduleLabel, MODULE_DIRS, METADATA_MODULES } from './model.js';
+import { buildWorkbook, download, workbookOrder } from './workbook.js';
 import { KIT_URL, MODALITIES, TIERS, MODULE_EXAMPLES, buildId, exampleId } from './fileid.js';
 
 const DEFAULT_REPO = 'ncihtan/htan2-data-model';
@@ -71,6 +72,7 @@ async function load(repo, ref, version, commit) {
     schemaById = new Map(M.schemas.map(s => [s.id, s]));
     attrById = new Map(M.attributes.map(a => [a.id, a]));
     writeQuery(repo, ref, version);
+    $('wbBtn').disabled = false;
     renderAll();
     const short = commit.sha.length > 12 ? commit.sha.slice(0, 7) : commit.sha;
     status(`${M.schemas.length} modules · ${M.attributes.length} attributes · ${repo}@${ref} (${short}${commit.date ? ', ' + commit.date : ''}) · ${version}`
@@ -113,6 +115,19 @@ $('sha').addEventListener('keydown', async e => {
   if (![...sel.options].some(o => o.value === ref)) sel.insertAdjacentHTML('afterbegin', `<option>${esc(ref)}</option>`);
   sel.value = ref;
   sel.dispatchEvent(new Event('change'));
+});
+
+// ---------------------------------------------------------------- blank workbook
+$('wbBtn').addEventListener('click', async () => {
+  const b = $('wbBtn'), label = b.textContent, prev = $('status').textContent;
+  b.disabled = true; b.textContent = 'Building workbook...';
+  try {
+    const mods = workbookOrder(M.schemas).map(s => ({ id: s.id, json: s.json }));
+    const buf = await buildWorkbook(mods, CTX);
+    download(buf, `HTAN2_workbook_${CTX.version}_${CTX.sha.slice(0, 7)}.xlsx`);
+    status(prev);
+  } catch (e) { console.error(e); status(`Could not build workbook: ${e.message}`, true); }
+  finally { b.disabled = false; b.textContent = label; }
 });
 
 // ---------------------------------------------------------------- shared helpers

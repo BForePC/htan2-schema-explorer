@@ -108,7 +108,7 @@ export function buildModel(files) {
     const names = Object.keys(props);
     const place = placeSchema(id, d.$id);
     schemas.push({
-      id, file: path, $id: d.$id || '', module: place.module, levels: place.levels,
+      id, file: path, $id: d.$id || '', json: d, module: place.module, levels: place.levels,
       description: d.description || '', what: shortWhat(d.description),
       n: names.length, nreq: names.filter(a => req.has(a)).length, ncond: names.filter(a => cond.has(a) && !req.has(a)).length, rules,
     });
