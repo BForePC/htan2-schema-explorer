@@ -1,7 +1,7 @@
-import { listRefs, resolve, schemaVersions, schemaFiles, fetchFile, githubUrl } from './github.js?v=202611161224';
-import { buildModel, moduleLabel, MODULE_DIRS, METADATA_MODULES } from './model.js?v=202611161224';
-import { buildWorkbook, download, workbookOrder } from './workbook.js?v=202611161224';
-import { KIT_URL, MODALITIES, TIERS, MODULE_EXAMPLES, buildId, exampleId } from './fileid.js?v=202611161224';
+import { listRefs, resolve, schemaVersions, schemaFiles, fetchFile, githubUrl } from './github.js?v=202611161255';
+import { buildModel, moduleLabel, MODULE_DIRS, METADATA_MODULES } from './model.js?v=202611161255';
+import { buildWorkbook, download, workbookOrder } from './workbook.js?v=202611161255';
+import { KIT_URL, MODALITIES, TIERS, MODULE_EXAMPLES, buildId, exampleId } from './fileid.js?v=202611161255';
 
 const DEFAULT_REPO = 'ncihtan/htan2-data-model';
 const $ = id => document.getElementById(id);
@@ -124,7 +124,7 @@ $('wbBtn').addEventListener('click', async () => {
   try {
     const mods = workbookOrder(M.schemas).map(s => ({ id: s.id, json: s.json }));
     const buf = await buildWorkbook(mods, CTX);
-    download(buf, `HTAN2_workbook_${CTX.version}_${CTX.sha.slice(0, 7)}.xlsx`);
+    download(buf, `BForePC_HTAN2_${CTX.version}_${CTX.sha.slice(0, 7)}.xlsx`);
     status(prev);
   } catch (e) { console.error(e); status(`Could not build workbook: ${e.message}`, true); }
   finally { b.disabled = false; b.textContent = label; }
