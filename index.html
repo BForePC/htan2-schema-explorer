@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTAN2 Schema Explorer - required, conditional and optional attributes</title>
+<meta name="description" content="Explore which HTAN Phase 2 data model attributes are required, conditionally required or optional, by module and data level, for any branch, tag or commit.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.79.1/dist/3d-force-graph.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>HTAN2 data model: what is required, conditional and optional</h1>
+  <div class="sub" id="sub">Loading...</div>
+  <div class="links" id="links"></div>
+
+  <div class="picker">
+    <label>Repository<input id="repo" spellcheck="false" aria-label="GitHub repository owner/name"></label>
+    <label>Branch or release tag<select id="ref" aria-label="Branch or tag"></select></label>
+    <label>or commit SHA<input id="sha" placeholder="paste SHA + Enter" spellcheck="false" aria-label="Commit SHA"></label>
+    <label>Schema version<select id="ver" aria-label="JSON schema version folder"></select></label>
+  </div>
+  <div id="status" role="status"></div>
+
+  <div id="main">
+    <figure class="lvfig">
+      <img src="https://docs.humantumoratlas.org/img/sequencing_data_levels.svg" alt="HTAN sequencing data levels: Level 1 raw FASTQs, Level 2 aligned BAMs, Level 3 derived expression matrix, Level 4 sample-level summary such as cell annotations" loading="lazy" onerror="this.closest('figure').style.display='none'">
+      <figcaption>HTAN sequencing data levels, from the <a href="https://docs.humantumoratlas.org/data_model/file_standards/" target="_blank" rel="noopener">HTAN Manual - File Standards</a> (Figure 1). Other assays follow the same raw-to-processed pattern; their per-level contents are in the grid below.</figcaption>
+    </figure>
+
+    <div class="legend" style="margin:14px 0 8px">
+      <span><span class="sq" style="background:var(--req)"></span><b>required</b>&nbsp;- always must be filled</span>
+      <span><span class="sq" style="background:var(--cond)"></span><b>conditional</b>&nbsp;- must be filled when another field triggers it</span>
+      <span><span class="sq" style="background:var(--opt)"></span><b>optional</b></span>
+    </div>
+    <table class="lv" id="levels"></table>
+    <div class="note" style="margin-top:6px">Module and level come from each schema's <code>$id</code>; level text is condensed from its description. Module names link to the module source, schema names to the JSON schema file. Counts: required · conditional · optional.</div>
+
+    <div class="tabs">
+      <button class="tab on" data-v="bars">By schema</button>
+      <button class="tab" data-v="rules">Conditional rules</button>
+      <button class="tab" data-v="matrix">Shared attributes</button>
+      <button class="tab" data-v="three">3D explore</button>
+    </div>
+
+    <section class="view on" id="v-bars">
+      <div class="legend"><span><span class="sq" style="background:var(--req)"></span>required attributes</span>
+        <span><span class="sq" style="background:var(--cond)"></span>required only when a condition is met</span>
+        <span><span class="sq" style="background:var(--opt)"></span>optional attributes</span></div>
+      <div class="note">Click a schema to list its attributes and rules.</div>
+      <div id="bars"></div>
+    </section>
+
+    <section class="view" id="v-rules">
+      <div class="note" style="margin:0 0 10px">Each row is one rule: when the condition on the left holds, the attributes on the right must be filled in. Read from the compiled JSON schemas, so rule changes that exist only in LinkML YAML on a branch appear once that branch regenerates its JSON.</div>
+      <div class="ctl"><select id="rmod"></select><input type="search" id="rq" placeholder="filter, ex. TREATMENT_TYPE"><span class="note" id="rcount" style="margin:0"></span></div>
+      <div id="rules"></div>
+    </section>
+
+    <section class="view" id="v-matrix">
+      <div class="legend"><span><span class="sq" style="background:var(--req)"></span>required in that schema</span>
+        <span><span class="sq" style="background:var(--cond)"></span>conditionally required</span>
+        <span><span class="sq" style="background:var(--opt)"></span>optional in that schema</span>
+        <span><span class="sq" style="background:var(--empty);outline:1px solid var(--border)"></span>not used</span>
+        <span><span class="dot" style="background:var(--var)"></span>status differs by schema</span></div>
+      <div class="ctl">
+        <label>Show <select id="mfilter">
+          <option value="2">attributes used by 2+ schemas</option>
+          <option value="varies">only attributes whose status differs by schema</option>
+          <option value="cond">only conditionally required attributes</option>
+          <option value="1">all attributes</option>
+        </select></label>
+        <input type="search" id="mq" placeholder="filter attribute, ex. FILE">
+        <span class="note" id="mcount" style="margin:0"></span>
+      </div>
+      <div id="matrixWrap"><div id="matrix"></div></div>
+    </section>
+
+    <section class="view" id="v-three">
+      <div class="legend"><span><span class="dot" style="background:var(--req)"></span>always required</span>
+        <span><span class="dot" style="background:var(--opt)"></span>always optional</span>
+        <span><span class="dot" style="background:var(--cond)"></span>conditional</span>
+        <span><span class="dot" style="background:var(--var)"></span>differs by schema</span>
+        <span><span class="dot" style="background:#b8ab9c"></span>module / schema</span>
+        <span>link color = state in that schema</span></div>
+      <div id="g3"><div id="gc" style="position:absolute;inset:0"></div><div id="labels"></div><div class="hint3">drag to rotate · scroll to zoom · click a node for details</div></div>
+    </section>
+  </div>
+
+  <footer class="note" style="margin-top:28px">Data is read live from GitHub in your browser (GitHub API, falling back to jsDelivr). Not an official HTAN product.</footer>
+</div>
+
+<div id="tip"></div>
+<div id="drawer"><button class="x" id="close" aria-label="Close">×</button><div id="dbody"></div></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

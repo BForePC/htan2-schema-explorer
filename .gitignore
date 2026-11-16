@@ -1,0 +1,24 @@
+# macos
+.DS_Store
+._*
+
+# python / local servers
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# node, if tooling is added later
+node_modules/
+
+# editors
+.idea/
+.vscode/
+*.swp
+
+# logs and archives
+*.log
+*.zip
+
+# empty nested clone
+htan2-schema-explorer/
