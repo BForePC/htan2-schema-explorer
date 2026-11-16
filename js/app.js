@@ -192,7 +192,8 @@ function renderHeader() {
     <a href="https://htan2-data-model.readthedocs.io/en/main/" target="_blank" rel="noopener">Data model documentation (main)</a>
     <a href="${KIT_URL}" target="_blank" rel="noopener">fileid-kit</a>
     <a href="https://docs.humantumoratlas.org/data_submission/checklist/" target="_blank" rel="noopener">HTAN acceptance checklist</a>
-    <a href="https://docs.humantumoratlas.org/addtnl_info/rfc/" target="_blank" rel="noopener">HTAN RFC process</a>`;
+    <a href="https://docs.humantumoratlas.org/addtnl_info/rfc/" target="_blank" rel="noopener">HTAN RFC process</a>
+    <a href="https://sagebionetworks.jira.com/servicedesk/customer/portal/1" target="_blank" rel="noopener">Help desk (Jira)</a>`;
 }
 
 function cellHtml(s) {
